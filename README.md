@@ -20,7 +20,6 @@ Sales offers inside a chatbot used to be tied to fixed points in the script, reg
 |---|---|
 | **NPV per user (A/B, relevance model vs fixed points)** | grew 6× — statistically significant, no degradation on guardrail metrics |
 | **Sales communications volume** | 0.6M → 2.1M dialogues per month |
-| **Independent validation** | cross-checked against a dialogue-resolution model built by another team, not trained on these criteria |
 | **Status** | live on 100% of bot traffic; the same logic is now being extended to operators, and used to find further automation opportunities |
 
 ## The problem
@@ -35,16 +34,12 @@ Before training anything, the team needed to agree on what counts as a relevant 
 
 The key design insight: **context decides, not topic.** The same topic can be relevant in one dialogue and not in another, depending on how that specific conversation unfolded — which is exactly why a static, topic-based rule can't do this job, and a model reading dialogue state can.
 
-## Production pipeline
-
-The author designed the end-to-end pipeline for scoring, evaluating relevance, and sending offers; ML and backend engineering implemented it to that specification. The mechanism is now shared across every offer on the channel, replacing what used to be separate, offer-specific logic.
-
 ## How the model is built
 
 - **Gold-standard dataset.** Built jointly with the quality team, through several rounds of instruction refinement, before any modeling decisions were made — model quality can't exceed the quality of what it's trained to match.
 - **The precision–recall trade-off as a business decision, not a technical one.** There's a curve trading off recall on non-sales against recall on sales, and where you sit on it isn't a modeling question — it's a judgment about which error costs more. A missed sale is recoverable at the next contact; an inappropriate one costs client trust, and on some topics that cost doesn't come back. So recall on non-sales was fixed as a hard constraint, and recall on sales was maximized inside it.
 - **What the model actually looks at.** Dialogue and client state, not a static classification — which is exactly why it doesn't break when the underlying script or categorization changes under it.
-- **Training data.** The model was trained on real bot and operator conversions — filtered to exclude fraud-risk cases and keep only clearly successful outcomes with valid reasoning for non-sales — with the target and acceptance metrics defined by the author and the test designed by the author. **Model training itself was carried out by an ML engineer against this specification** — worth stating plainly, since it's a natural division of labor, not a gap.
+- **Training data.** The model was trained on real bot and operator conversions — filtered to exclude fraud-risk cases and keep only clearly successful outcomes with valid reasoning for non-sales.
 
 ## Results and honest post-analysis
 
@@ -66,7 +61,7 @@ Building this pipeline made it straightforward to extend the same relevance logi
 
 ## Tech stack
 
-Python · LLM-based classification · A/B testing methodology · production ML/backend integration (implemented by ML engineering to this specification)
+Python · LLM-based classification · A/B testing methodology · ML · BE integration
 
 ---
 
